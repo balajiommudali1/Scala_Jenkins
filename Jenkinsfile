@@ -1,6 +1,6 @@
 import groovy.io.FileType.*;
 node_os  = "";
-projectdir = "/var/lib/jenkins/Workspace/${env.BuildName}"
+projectdir = "/var/lib/jenkins/Workspace/${env.Job_Name}"
 _scala_target_path = "${projectdir}/target"
 _artifactpath = "/tmp/artifact"
 
