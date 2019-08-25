@@ -1,8 +1,9 @@
 import groovy.io.FileType.*;
 node_os  = "";
-projectdir = "/var/lib/jenkins/Workspace/${env.Job_Name}"
-_scala_target_path = "${projectdir}/target"
-_artifactpath = "/tmp/artifact"
+projectdir = "/var/lib/jenkins/workspace/${env.Job_Name}"
+_scala_target_path = "${projectdir}/target/scala-2.10";
+_artifactpath = "/tmp/artifact";
+_scala_artifact_path = "${_artifactpath}/scala_artifact"
 
 
 node {
@@ -13,7 +14,8 @@ node {
         else
             println 'Running on LINUX node...!!!'
 		ScalaBuild();
-		ExecuteCmd();
+		executeCommand();
+		archive();
     }catch(Exception e){
 		throw e;
 	}finally{
@@ -29,37 +31,58 @@ def ScalaBuild()
  sh "pwd"
 }
 
-def ExecuteCmd()
+def executeCommand()
 {
-    sh "mkdir $_artifactpath"
+   /* try 
+    {
+        if(node_os == _windows)
+            bat "${cmdStr}";
+        else*/
+            sh "if [ ! -d ${_artifactpath} ]; then mkdir ${_artifactpath}; fi";
+  /*  }
+    catch(Exception e) 
+    {
+        println "${_unicodeError} Error occurred while executing command";
+        throw e;
+    }*/
 }
-def gitPush()
+def archive()
 {
  dir(_artifactpath)
  {
+ deleteDir();
+ 
  clonerepo(node_os, "github.com/balajiommudali1/scala_artifact.git", "master");
- sh "cp _scala_target_path/*.jar ${_artifactpath}/scala_artifact/"
- deployment();
+ sh "cp ${_scala_target_path}/*.jar ${_scala_artifact_path}"
+ sh "pwd"
+   GitPush();
  //zip dir: _solutionFilePath, glob: "${_buildFileName}", zipFile: _artifactExeFile; 
- sh "git add ."
- sh "git commit -m "test""
- sh "git push"
- }
+ } 
 } 
- def deployment()
+
+ def GitPush()
  {
- println "Deployment"
+ dir(_scala_artifact_path)
+ {
+ withCredentials([string(credentialsId: 'comm_git_clone_token1', variable: 'comm_git_clone_token1')]) {
+ println "Git push"
+ sh "git add ."
+ sh "git commit -m 'test' "
+ sh "git remote set-url origin https://${comm_git_clone_token1}@github.com/balajiommudali1/scala_artifact.git"
+ sh "git push origin master"
+ }
+ }
  }
 
 def clonerepo(node_os, repo_url, branch){
-withCredentials([string(credentialsId: 'comm_git_clone_token', variable: 'comm_git_clone_token')]) {
+withCredentials([string(credentialsId: 'comm_git_clone_token1', variable: 'comm_git_clone_token1')]) {
 		if(node_os == 'WIN') {
-			bat "git clone -b ${branch} https://${comm_git_clone_token}@${repo_url}";
+			bat "git clone -b ${branch} https://${comm_git_clone_token1}@${repo_url}";
 			println "Cloned the repo";
 		}
 		else
 		{
-			sh "git clone -b ${branch} https://${comm_git_clone_token}@${repo_url}"
+			sh "git clone -b ${branch} https://${comm_git_clone_token1}@${repo_url}"
 			println "Cloned the repo";
 		}
     }
