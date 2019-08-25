@@ -55,7 +55,8 @@ def archive()
  clonerepo(node_os, "github.com/balajiommudali1/scala_artifact.git", "master");
  sh "cp ${_scala_target_path}/*.jar ${_scala_artifact_path}"
  sh "pwd"
-   GitPush();
+ GitPush();
+ Deployment();
  //zip dir: _solutionFilePath, glob: "${_buildFileName}", zipFile: _artifactExeFile; 
  } 
 } 
@@ -73,6 +74,13 @@ def archive()
  }
  }
  }
+ def Deployment()
+ {
+ // withCredentials(bindings: [sshUserPrivateKey(credentialsId: 'appnode', keyFileVariable: 'appnode', passphraseVariable: '', usernameVariable: 'ubuntu')]) {
+  sh " scp -i /var/lib/jenkins/appnode.pem ${_scala_target_path}/*.jar ubuntu@3.83.164.48:/tmp"
+  sh " ssh -i /var/lib/jenkins/appnode.pem ubuntu@3.83.164.48 sudo java -jar /tmp/scala_*.jar"
+//}
+ } 
 
 def clonerepo(node_os, repo_url, branch){
 withCredentials([string(credentialsId: 'comm_git_clone_token1', variable: 'comm_git_clone_token1')]) {
