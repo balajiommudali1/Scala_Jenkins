@@ -42,17 +42,14 @@ def gitPush()
  deployment();
  //zip dir: _solutionFilePath, glob: "${_buildFileName}", zipFile: _artifactExeFile; 
  sh "git add ."
- sh "git commit -m "test"
+ sh "git commit -m "test""
  sh "git push"
-
  }
- 
+} 
  def deployment()
  {
  println "Deployment"
  }
- 
-}
 
 def clonerepo(node_os, repo_url, branch){
 withCredentials([string(credentialsId: 'comm_git_clone_token', variable: 'comm_git_clone_token')]) {
